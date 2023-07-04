@@ -23,6 +23,7 @@ const MyCustomStringInput: FC<Props> = ({
 }) => {
   const client = useClient({apiVersion: '2023-01-01'})
   const [pathArray, setPathArray] = useState<string[]>([value])
+  let seen = {} as any
 
   const sanityParent = useFormValue(['parent']) as ParentPageReference
   const [parentRef, setParentRef] = useState<ParentPageReference>(sanityParent)
@@ -39,6 +40,7 @@ const MyCustomStringInput: FC<Props> = ({
   useEffect(() => {
     if (!sanityParent) {
       setPathArray([value])
+      seen = {} as any
     }
     setParentRef(sanityParent)
   }, [sanityParent, setParentRef])
@@ -55,6 +57,10 @@ const MyCustomStringInput: FC<Props> = ({
 
     const fetchParent = async () => {
       const [parent] = await client.fetch(`array::unique(*[_id == "${parentRef?._ref}"])`)
+      if (seen[parent]) {
+        throw new Error('Circular reference detected')
+      }
+      seen[parent] = true
       setPathArray((pathArray) => (parent.slug ? [parent.slug, ...pathArray] : pathArray))
       setParentRef(parent.parent)
     }
