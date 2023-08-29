@@ -4,3 +4,5 @@ export type ParentPageReference =
       _type: 'reference'
     }
   | undefined
+
+export type ValidaitonError = string | undefined
